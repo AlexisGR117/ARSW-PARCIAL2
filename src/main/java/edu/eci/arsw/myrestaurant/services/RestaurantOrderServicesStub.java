@@ -1,18 +1,24 @@
 package edu.eci.arsw.myrestaurant.services;
 
 
+import com.github.cliftonlabs.json_simple.JsonObject;
 import edu.eci.arsw.myrestaurant.model.Order;
 import edu.eci.arsw.myrestaurant.model.RestaurantProduct;
 import edu.eci.arsw.myrestaurant.beans.BillCalculator;
 import edu.eci.arsw.myrestaurant.model.ProductType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-
+@Service
 public class RestaurantOrderServicesStub implements RestaurantOrderServices {
 
-    
+    @Autowired
     BillCalculator calc = null;
 
     public RestaurantOrderServicesStub() {
@@ -48,6 +54,19 @@ public class RestaurantOrderServicesStub implements RestaurantOrderServices {
     @Override
     public Set<Integer> getTablesWithOrders() {
         return tableOrders.keySet();
+    }
+
+    @Override
+    public ArrayList<JsonObject> getOrders() {
+        ArrayList<JsonObject> orders = new ArrayList<>();
+        tableOrders.forEach((key, value) -> {
+            JsonObject order = new JsonObject();
+            order.put("tableNumber", value.getTableNumber());
+            order.put("orderAmountsMap", value.getOrderAmountsMap());
+            order.put("accountTotal", calc.calculateBill(value,productsMap));
+            orders.add(order);
+        });
+        return orders;
     }
 
     @Override
